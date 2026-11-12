@@ -3457,6 +3457,8 @@
   .tt-tag.p2{background:rgba(46,230,245,.1);color:var(--cyan)}
   .tt-tag.ok{background:rgba(155,92,255,.14);color:#c9a8ff}
   .tt-body{padding:2px 15px 15px 57px;display:grid;gap:10px}
+  .tt-prog{background:rgba(215,255,63,.06);border:1px solid rgba(215,255,63,.22);border-radius:10px;padding:9px 11px}
+  .tt-prog h4{color:var(--lime)!important}
   .tt-row h4{margin:0 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--quiet);font-family:CuboDIN,"Arial Narrow",Arial,sans-serif}
   .tt-row p,.tt-row li{margin:0;color:var(--text);font-size:13px;line-height:1.55}
   .tt-row ol{margin:0;padding-left:18px;display:grid;gap:3px}
@@ -3517,13 +3519,13 @@
 <script>
 (function(){
   var TASKS=[
-  {id:"T01",prio:"P0",area:"Medición",due:"16/11",approval:true,cal:"Antes del reporte de noviembre",
+  {id:"T01",prio:"P0",area:"Medición",due:"16/11",approval:true,initial:"En curso",progress:"12/11: filtro «QA Internal UTM» creado en GA4 en estado Prueba (sin activar). GA4 solo filtra por IP o por el parámetro traffic_type, no por UTM: activarlo requiere etiquetar las pruebas en el código. No hay contenedor GTM publicado; la medición sale de gtag.js directo (contradice la ficha, que habla de GTM). Propuesta pendiente: excluir qa_internal, search.google.com y hpanel.hostinger.com al analizar, sin borrar datos.",cal:"Antes del reporte de noviembre",
    title:"Limpiar visitas de prueba y falso orgánico en GA4",
    problem:"Los datos mezclan visitas de pruebas y de herramientas con visitas reales. Así no se puede saber cuántos contactos vienen de Google.",
    evidence:"14/10–11/11: ≈280 vistas de página marcadas <code>qa_internal</code> (canal «Unassigned»). El 12/10, la fuente <code>search.google.com</code> (Search Console, no un buscador) aparece como «Organic Search» con 10 form_start, 4 generate_lead y 5 click_chat. También se midió una página <code>revision.php</code> de WordPress.",
    steps:["GA4 › Administrar › Filtros de datos: activar el filtro de tráfico interno con la regla del equipo (IP o parámetro <code>qa_internal</code>).","Marcar <code>hpanel.hostinger.com</code> como referencia no deseada y excluir <code>search.google.com</code> del análisis orgánico.","En GTM, que el tag no se dispare en <code>wp-admin</code>, vistas previas ni <code>revision.php</code>."],
    done:"En 7 días no aparecen <code>qa_internal</code> ni <code>search.google.com</code> en los informes estándar."},
-  {id:"T02",prio:"P0",area:"Medición",due:"14/11",approval:false,cal:"Desbloquea B07 (abandono de formulario)",
+  {id:"T02",prio:"P0",area:"Medición",due:"14/11",approval:false,initial:"En curso",progress:"12/11: GA4 SÍ mide. 2 envíos de prueba (Home 06:30 y Contact 06:31 AEDT del 13/11) dieron 1 form_start + 1 generate_lead cada uno, sin duplicados. Registrados en K2RA Leads › Excluded Records. Falta: confirmar que el email llegó al buzón del cliente (NO CONFIRMADO). Excluir estas 2 pruebas del reporte de noviembre.",cal:"Desbloquea B07 (abandono de formulario)",
    title:"Comprobar que los formularios siguen registrándose",
    problem:"Desde el 13/10 GA4 no registra ningún formulario iniciado ni enviado. Puede que no haya habido envíos reales, pero no está comprobado.",
    evidence:"0 <code>form_start</code> y 0 <code>generate_lead</code> del 14/10 al 11/11 en todos los canales. Entre el 18/09 y el 13/10 sí se registraban (p. ej. 8 form_start el 18/09).",
@@ -3603,7 +3605,7 @@
   function strip(h){var d=document.createElement("div");d.innerHTML=h;return d.textContent;}
 
   function card(t){
-    var st=state[t.id]||"Pendiente";
+    var st=state[t.id]||t.initial||"Pendiente";
     var el=document.createElement("details");
     el.className="tt-card"+(st==="Hecho"?" is-done":"");
     el.dataset.prio=t.prio;el.dataset.id=t.id;el.id="tarea-"+t.id.toLowerCase();
@@ -3614,6 +3616,7 @@
       '<span class="tt-tag">Hasta '+t.due+'</span>'+(t.approval?'<span class="tt-tag ok">Requiere aprobación</span>':'')+
       '<span class="tt-tag tt-st">'+st+'</span></span></summary>'+
       '<div class="tt-body">'+
+      (t.progress?'<div class="tt-row tt-prog"><h4>Avance</h4><p>'+t.progress+'</p></div>':'')+
       '<div class="tt-row"><h4>Qué pasa</h4><p>'+t.problem+'</p></div>'+
       '<div class="tt-row"><h4>Evidencia (resultado medido)</h4><p>'+t.evidence+'</p></div>'+
       '<div class="tt-row"><h4>Qué hacer (propuesta)</h4><ol>'+t.steps.map(function(s){return "<li>"+s+"</li>";}).join("")+'</ol></div>'+
@@ -3648,7 +3651,7 @@
   function apply(){
     var done=0;
     root.querySelectorAll(".tt-card").forEach(function(c){
-      var st=state[c.dataset.id]||"Pendiente";if(st==="Hecho")done++;
+      var tk=TASKS.filter(function(x){return x.id===c.dataset.id;})[0]||{};var st=state[c.dataset.id]||tk.initial||"Pendiente";if(st==="Hecho")done++;
       var show=filter==="all"||(filter==="open"?st!=="Hecho":c.dataset.prio===filter);
       c.hidden=!show;
     });
