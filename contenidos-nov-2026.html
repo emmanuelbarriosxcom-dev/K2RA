@@ -3419,6 +3419,250 @@
           <div class="calendar" id="calendar"></div>
         </div>
         <div class="list-view" id="list-view" hidden></div>
+        <!-- ===== TAREAS TÉCNICAS INMEDIATAS (añadido 12/11/2026) ===== -->
+<style>
+  .tt-wrap{margin:34px 0 8px;padding-top:26px;border-top:1px solid var(--line)}
+  .tt-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .tt-head h2{margin:6px 0 4px;font-size:26px;letter-spacing:-.4px}
+  .tt-head p{margin:0;color:var(--muted);max-width:720px}
+  .tt-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 18px}
+  .tt-kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+  .tt-kpi b{display:block;font-size:24px;line-height:1.1;color:var(--text)}
+  .tt-kpi b small{font-size:13px;color:var(--quiet);font-weight:400}
+  .tt-kpi span{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+  .tt-kpi.alert b{color:#ff8a7a}
+  .tt-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+  .tt-filter{min-height:34px;padding:6px 12px;border:1px solid var(--line);background:transparent;font-size:12px;font-weight:700;border-radius:9px}
+  .tt-filter[aria-pressed="true"]{background:var(--lime);color:var(--bg);border-color:var(--lime)}
+  .tt-progress{margin-left:auto;font-size:12px;color:var(--muted)}
+  .tt-progress b{color:var(--lime)}
+  .tt-group{margin:18px 0 6px;display:flex;align-items:center;gap:10px}
+  .tt-group h3{margin:0;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-family:CuboDIN,"Arial Narrow",Arial,sans-serif;color:var(--muted)}
+  .tt-group .line{flex:1;height:1px;background:var(--line)}
+  .tt-list{display:grid;gap:10px}
+  .tt-card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--quiet);border-radius:14px;overflow:hidden}
+  .tt-card[data-prio="P0"]{border-left-color:#ff8a7a}
+  .tt-card[data-prio="P1"]{border-left-color:var(--lime)}
+  .tt-card[data-prio="P2"]{border-left-color:var(--cyan)}
+  .tt-card.is-done{opacity:.55}
+  .tt-card.is-done .tt-title{text-decoration:line-through}
+  .tt-sum{display:flex;align-items:center;gap:12px;padding:13px 15px;cursor:pointer;list-style:none}
+  .tt-sum::-webkit-details-marker{display:none}
+  .tt-id{font:700 12px CuboDIN,"Arial Narrow",Arial,sans-serif;color:var(--quiet);min-width:30px}
+  .tt-title{font-weight:700;font-size:14px;flex:1;min-width:0}
+  .tt-meta{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+  .tt-tag{font-size:10px;font-weight:700;border-radius:6px;padding:3px 7px;background:var(--soft);color:var(--muted);white-space:nowrap}
+  .tt-tag.p0{background:rgba(255,138,122,.13);color:#ffb3a8}
+  .tt-tag.p1{background:rgba(215,255,63,.1);color:var(--lime)}
+  .tt-tag.p2{background:rgba(46,230,245,.1);color:var(--cyan)}
+  .tt-tag.ok{background:rgba(155,92,255,.14);color:#c9a8ff}
+  .tt-body{padding:2px 15px 15px 57px;display:grid;gap:10px}
+  .tt-row h4{margin:0 0 3px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--quiet);font-family:CuboDIN,"Arial Narrow",Arial,sans-serif}
+  .tt-row p,.tt-row li{margin:0;color:var(--text);font-size:13px;line-height:1.55}
+  .tt-row ol{margin:0;padding-left:18px;display:grid;gap:3px}
+  .tt-row code{font-size:12px;background:rgba(155,200,213,.1);padding:1px 5px;border-radius:5px;word-break:break-all}
+  .tt-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-top:4px}
+  .tt-actions select{min-height:34px;padding:5px 10px;font-size:12px}
+  .tt-copy{min-height:34px;padding:6px 12px;border:1px solid var(--line);background:transparent;font-size:12px;font-weight:700;border-radius:9px}
+  .tt-copy:hover,.tt-filter:hover{border-color:rgba(155,200,213,.4)}
+  .tt-note{margin-top:20px;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:12px;color:var(--muted)}
+  .tt-note b{color:var(--text)}
+  .tt-note ul{margin:6px 0 0;padding-left:18px;display:grid;gap:3px}
+  @media (max-width:640px){
+    .tt-sum{flex-wrap:wrap}.tt-meta{width:100%;justify-content:flex-start;padding-left:42px}
+    .tt-body{padding-left:15px}.tt-progress{margin-left:0;width:100%}
+  }
+  @media print{.tt-tools,.tt-actions{display:none}.tt-card details,.tt-card{break-inside:avoid}}
+</style>
+
+<section class="tt-wrap" id="tareas-tecnicas" aria-labelledby="tt-title">
+  <div class="tt-head">
+    <div>
+      <div class="eyebrow"><span class="dot"></span>SEO TÉCNICO · LIMPIEZA · MEDICIÓN</div>
+      <h2 id="tt-title">Tareas técnicas inmediatas</h2>
+      <p>Lo que hay que arreglar en paralelo al contenido para que las publicaciones de noviembre rindan y los datos del reporte sean fiables. Todo lo de esta lista es <b>PROPUESTA</b>; las cifras son <b>RESULTADOS</b> medidos (extracción 12/11/2026).</p>
+    </div>
+  </div>
+
+  <div class="tt-kpis" aria-label="Datos que motivan la lista">
+    <div class="tt-kpi alert"><b>43 <small>vs 85</small></b><span>Clics de Google (GSC) · 14/10–10/11 frente a 16/09–13/10 · −49 %</span></div>
+    <div class="tt-kpi alert"><b>0</b><span>Formularios iniciados o enviados registrados en GA4 desde el 13/10 (todos los canales)</span></div>
+    <div class="tt-kpi"><b>≈280</b><span>Vistas de página de pruebas internas (<code>qa_internal</code>) mezcladas en GA4 en 4 semanas</span></div>
+    <div class="tt-kpi"><b>63,6</b><span>Posición media de la página de servicio Concrete Spalling · 471 impresiones, 0 clics</span></div>
+  </div>
+
+  <div class="tt-tools" role="toolbar" aria-label="Filtrar tareas">
+    <button type="button" class="tt-filter" data-tt-filter="all" aria-pressed="true">Todas</button>
+    <button type="button" class="tt-filter" data-tt-filter="P0" aria-pressed="false">Urgente · esta semana</button>
+    <button type="button" class="tt-filter" data-tt-filter="P1" aria-pressed="false">Próximas 2 semanas</button>
+    <button type="button" class="tt-filter" data-tt-filter="P2" aria-pressed="false">Antes del cierre</button>
+    <button type="button" class="tt-filter" data-tt-filter="open" aria-pressed="false">Sin terminar</button>
+    <span class="tt-progress" id="tt-progress" aria-live="polite"></span>
+  </div>
+
+  <div id="tt-groups"></div>
+
+  <div class="tt-note">
+    <b>Lo que no se puede afirmar con estos datos</b>
+    <ul>
+      <li>Que los formularios estén rotos: 0 eventos desde el 13/10 puede ser falta de envíos reales. Por eso T02 es una prueba, no un arreglo.</li>
+      <li>La causa de la caída del artículo High Build Primer ni la de la Home: NO CONFIRMADO hasta revisar GSC y el historial de WordPress.</li>
+      <li>El estado actual (200/301/404) de las URLs citadas: no se pudo abrir el sitio en vivo durante esta revisión. Confirmarlo antes de redirigir.</li>
+      <li>Que una tarea, una vez hecha, cause una subida: se mide en 28 días y no se atribuye automáticamente.</li>
+    </ul>
+    <p style="margin:8px 0 0">Fuentes: Search Console <code>https://k2ra.com.au/</code>, GA4 <code>531064848</code> y Business Profile vía Windsor (12/11/2026); ClickUp lista K2RA (logs 19/10 y 10/11). El estado de cada tarea se guarda solo en este navegador.</p>
+  </div>
+</section>
+
+<script>
+(function(){
+  var TASKS=[
+  {id:"T01",prio:"P0",area:"Medición",due:"16/11",approval:true,cal:"Antes del reporte de noviembre",
+   title:"Limpiar visitas de prueba y falso orgánico en GA4",
+   problem:"Los datos mezclan visitas de pruebas y de herramientas con visitas reales. Así no se puede saber cuántos contactos vienen de Google.",
+   evidence:"14/10–11/11: ≈280 vistas de página marcadas <code>qa_internal</code> (canal «Unassigned»). El 12/10, la fuente <code>search.google.com</code> (Search Console, no un buscador) aparece como «Organic Search» con 10 form_start, 4 generate_lead y 5 click_chat. También se midió una página <code>revision.php</code> de WordPress.",
+   steps:["GA4 › Administrar › Filtros de datos: activar el filtro de tráfico interno con la regla del equipo (IP o parámetro <code>qa_internal</code>).","Marcar <code>hpanel.hostinger.com</code> como referencia no deseada y excluir <code>search.google.com</code> del análisis orgánico.","En GTM, que el tag no se dispare en <code>wp-admin</code>, vistas previas ni <code>revision.php</code>."],
+   done:"En 7 días no aparecen <code>qa_internal</code> ni <code>search.google.com</code> en los informes estándar."},
+  {id:"T02",prio:"P0",area:"Medición",due:"14/11",approval:false,cal:"Desbloquea B07 (abandono de formulario)",
+   title:"Comprobar que los formularios siguen registrándose",
+   problem:"Desde el 13/10 GA4 no registra ningún formulario iniciado ni enviado. Puede que no haya habido envíos reales, pero no está comprobado.",
+   evidence:"0 <code>form_start</code> y 0 <code>generate_lead</code> del 14/10 al 11/11 en todos los canales. Entre el 18/09 y el 13/10 sí se registraban (p. ej. 8 form_start el 18/09).",
+   steps:["Hacer 1 envío de prueba en Home y otro en Contact, marcados como <code>qa_internal</code>.","Revisar DebugView, el email de notificación y la hoja K2RA Leads.","Anotar el resultado en ClickUp (tarea B07). Si no se registra, revisar el tag GTM del formulario Elementor."],
+   done:"Aparece 1 form_start + 1 generate_lead por prueba y llega el email."},
+  {id:"T03",prio:"P0",area:"Contenido técnico",due:"16/11",approval:false,cal:"Afecta al feeder ID 378 hacia Façade",
+   title:"Diagnosticar la caída del artículo High Build Primer",
+   problem:"Era el artículo que más visitas traía y dejó de recibir clics. Explica casi la mitad de la caída total de clics del sitio.",
+   evidence:"<code>/what-is-high-build-paint-primer-and-when-should-you-use-it/</code>: 19 → 0 clics; 2.060 → 1.039 impresiones; posición 6,6 → 7,9. En el periodo anterior también aparecían variantes de URL con errores (<code>/what-is-high-build-primer-and-when-should-you-use-it/</code>, <code>/what-is-high-build-paint-primer-and-when-should-use-it/</code>).",
+   steps:["Inspección de URL en GSC: indexada, canonical y último rastreo.","Historial de revisiones de WordPress: ¿se cambió título, contenido o slug después del 13/10?","Comprobar que las variantes con errores redirigen con 301 a la URL buena.","No reescribir hasta tener la causa documentada."],
+   done:"Causa anotada en ClickUp; si fue un cambio propio, revertirlo y medir 28 días."},
+  {id:"T04",prio:"P0",area:"Canibalización",due:"16/11",approval:true,cal:"Hay que resolverlo antes de o08 (23/11), que usa esta URL",
+   title:"Corregir la URL con slug roto «https-k2ra-com-au-…»",
+   problem:"Hay dos páginas sobre contratistas de pintura comercial y una tiene una URL mal escrita. Se quitan visibilidad entre ellas y con la página de Façade.",
+   evidence:"<code>/https-k2ra-com-au-commercial-painting-contractors-nsw/</code>: 288 impresiones (pos. 12,8). <code>/commercial-painting-contractors-nsw/</code>: 1.053 impresiones (pos. 17). Para «commercial facade repairs sydney» compiten la URL rota (216 impr.) y Façade (105 impr.). Las guías antiguas «…how-to-choose-the-right-team…» y «…how-to-choose-the-right-contractor…» siguen saliendo en GSC.",
+   steps:["Decidir qué página responde a «commercial facade repairs / painting contractors».","Cambiar el slug roto por uno limpio con 301 desde el antiguo (o fusionar con la otra página).","Actualizar enlaces internos y la URL de o08 en este calendario.","Confirmar que las dos guías antiguas redirigen a la página elegida."],
+   done:"La URL rota devuelve 301 y en GSC hay una sola URL por intención."},
+  {id:"T05",prio:"P0",area:"Indexación · privacidad",due:"16/11",approval:true,cal:"",
+   title:"Quitar de Google las páginas de autor",
+   problem:"Las páginas de autor del blog salen en Google por búsquedas comerciales, y una de ellas muestra en la URL un usuario creado a partir del email del cliente.",
+   evidence:"<code>/author/k2ra-technical-team/</code>: 158 impresiones (+34 en page/2); sale para «rope access concrete repairs sydney» (113 impr., pos. 7,7). Existe <code>/author/k2remedialgmail-com/</code>.",
+   steps:["Yoast › Archivos de autor: noindex (o desactivarlos si solo hay un autor).","Cambiar el nombre visible en URL del usuario <code>k2remedial…</code> para que no derive del email.","Reasignar entradas al autor «K2RA Technical Team» y redirigir la URL antigua."],
+   done:"Las URLs de autor tienen noindex y desaparecen de GSC en 2–4 semanas."},
+
+  {id:"T06",prio:"P1",area:"Indexación",due:"20/11",approval:true,cal:"Antes de nuevas ediciones de Façade (o01)",
+   title:"Enviar el sitemap en GSC y resolver el duplicado de Façade",
+   problem:"Google no tiene el sitemap enviado en esta propiedad y la página de Façade aparece dos veces en él.",
+   evidence:"ClickUp 19/10: la propiedad no tiene sitemaps enviados. ClickUp 10/11: <code>/facade-remediation-painting/</code> está en <code>post-sitemap.xml</code> (lastmod 20/04) y en <code>page-sitemap.xml</code> (lastmod 09/11).",
+   steps:["Enviar <code>sitemap_index.xml</code> en Search Console (sin riesgo).","Identificar qué entrada de WordPress genera la línea en post-sitemap (¿una entrada con el mismo slug?).","Con respaldo, excluirla o redirigirla y conservar la página."],
+   done:"Sitemap «Correcto» en GSC y Façade solo en page-sitemap."},
+  {id:"T07",prio:"P0",area:"Canibalización",due:"16/11",approval:true,cal:"Hacer antes de o06 (16/11)",
+   title:"Dar prioridad a la página de servicio de hormigón",
+   problem:"Los artículos del blog le quitan el sitio a la página que vende el servicio. Google no sabe cuál mostrar.",
+   evidence:"<code>/concrete-spalling-repairs/</code>: posición 63,6, 471 impr., 0 clics. Para «concrete spalling repair» compiten 4 URLs; el artículo «…how-to-fix-concrete-cancer…» va en pos. 28,7. Los artículos «emergency-», «licensed-» y «concrete-repair-near-me-» buscan intención de contratación desde el blog.",
+   steps:["Mapa 1 consulta → 1 URL en la hoja SEO Plan.","En cada artículo de hormigón, un enlace con texto descriptivo hacia el servicio.","Evaluar fusionar con 301 los artículos «near me» que repiten intención (revisar antes sus clics; no borrar)."],
+   done:"Una URL por consulta en el mapa; medir la posición del servicio a 28 días sin atribuir."},
+  {id:"T08",prio:"P1",area:"Canibalización",due:"23/11",approval:true,cal:"",
+   title:"Unificar Safety y Safety & Compliance",
+   problem:"Dos páginas casi iguales compiten entre sí por las mismas búsquedas de empresa.",
+   evidence:"<code>/safety/</code>: 187 impr. <code>/safety-compliance/</code>: 146 impr. Ambas salen para «rope access company sydney»; <code>/safety/</code> también para «rope access concrete repairs» (43 impr.).",
+   steps:["Elegir la que se queda.","301 de la otra; actualizar menú y enlaces internos."],
+   done:"Una sola página de seguridad en GSC."},
+  {id:"T09",prio:"P1",area:"SEO on-page",due:"23/11",approval:false,cal:"",
+   title:"Revisar por qué la Home pierde posición, incluso con la marca",
+   problem:"La página principal aparece mucho más abajo que antes y no es la primera para el nombre de la empresa.",
+   evidence:"Posición media de la Home: 11,7 → 36,3. Para «k2 rope access» la Home va en 19,4, mientras <code>/sydney-nsw/</code> va en 3 y <code>/safety/</code> en 12,6. Causa: NO CONFIRMADO.",
+   steps:["Revisar title y H1: que incluyan «K2 Rope Access».","Schema Organization/LocalBusiness con nombre, teléfono 0451 182 327 y dirección de la ficha.","Comprobar que el logo y el menú enlazan a la Home."],
+   done:"La Home es el primer resultado propio para la marca en GSC."},
+  {id:"T10",prio:"P1",area:"Limpieza",due:"23/11",approval:true,cal:"",
+   title:"Limpiar 404, slugs con errores y contenido fuera de mercado",
+   problem:"Hay páginas rotas, URLs mal escritas y un artículo de Brisbane (fuera de la zona de servicio) con una copia duplicada.",
+   evidence:"GSC (12/10): 9 no encontradas, 35 redirecciones, 8 rastreadas sin indexar. URLs con errores vistas: <code>/who-pres-for-concrete-spalling…</code>, <code>/who-pays-for-concrete-spalling-in-strata-buildings-nsw/</code>, <code>/concrete-spalling-repair-how-to-fix-concrete-damage</code>. El artículo de Brisbane tenía 1.121 impr. y ya no aparece, pero su copia <code>…-damage-2/</code> sigue recibiendo visitas.",
+   steps:["Exportar la lista «No encontrada» de GSC.","301 de cada URL rota a su versión correcta y quitar enlaces internos rotos.","Brisbane y su copia «-2»: 301 a Concrete Spalling o retirar (410)."],
+   done:"0 «No encontrada» nuevas y ninguna copia «-2» accesible."},
+  {id:"T11",prio:"P1",area:"Conversión",due:"20/11",approval:false,cal:"",
+   title:"Arreglar enlaces muertos y el desbordamiento móvil",
+   problem:"Hay botones que no llevan a ningún sitio en páginas de decisión, y un título que se sale de la pantalla en el móvil.",
+   evidence:"4 enlaces <code>href=\"#\"</code> en Commercial Assets y Government Assets; H1 de Residential Strata desborda en móvil (ancho 391 px a 360/390 px). Documentado en ClickUp 10/11, sin corregir.",
+   steps:["Apuntar los 4 enlaces a Contacto o al servicio correcto.","Ajustar el H1 móvil de Residential Strata.","QA en 360 y 390 px sin enviar formularios."],
+   done:"0 enlaces <code>href=\"#\"</code> y sin scroll horizontal en móvil."},
+
+  {id:"T12",prio:"P2",area:"Business Profile",due:"25/11",approval:false,cal:"g01–g03 ya tenían fecha (05, 09 y 12/11)",
+   title:"Confirmar la ficha de Google y la publicación de los posts",
+   problem:"La ficha casi no genera acciones en noviembre y hay que confirmar que los posts del calendario salieron.",
+   evidence:"Noviembre (1–11): 0 llamadas, 1 clic a la web, 0–12 impresiones/día. Del 09 al 11/11 sale 0 (probable retraso de datos; NO CONFIRMADO).",
+   steps:["Comprobar que la ficha está activa y sin avisos.","Verificar que g01, g02 y g03 están publicados y marcar su estado en este calendario.","Volver a extraer los datos de la ficha el 16/11."],
+   done:"Ficha activa y estado real de g01–g03 marcado."}
+  ];
+
+  var GROUPS=[["P0","Urgente · esta semana (antes del 16/11)"],["P1","Próximas 2 semanas (antes del 23/11)"],["P2","Antes del cierre de mes (30/11)"]];
+  var KEY="k2ra-tareas-tecnicas-2026-11";
+  var state={};
+  try{state=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){state={};}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  var filter="all";
+  var root=document.getElementById("tt-groups");
+  function strip(h){var d=document.createElement("div");d.innerHTML=h;return d.textContent;}
+
+  function card(t){
+    var st=state[t.id]||"Pendiente";
+    var el=document.createElement("details");
+    el.className="tt-card"+(st==="Hecho"?" is-done":"");
+    el.dataset.prio=t.prio;el.dataset.id=t.id;el.id="tarea-"+t.id.toLowerCase();
+    var pc=t.prio.toLowerCase();
+    el.innerHTML=
+      '<summary class="tt-sum"><span class="tt-id">'+t.id+'</span><span class="tt-title"></span>'+
+      '<span class="tt-meta"><span class="tt-tag '+pc+'">'+t.prio+'</span><span class="tt-tag">'+t.area+'</span>'+
+      '<span class="tt-tag">Hasta '+t.due+'</span>'+(t.approval?'<span class="tt-tag ok">Requiere aprobación</span>':'')+
+      '<span class="tt-tag tt-st">'+st+'</span></span></summary>'+
+      '<div class="tt-body">'+
+      '<div class="tt-row"><h4>Qué pasa</h4><p>'+t.problem+'</p></div>'+
+      '<div class="tt-row"><h4>Evidencia (resultado medido)</h4><p>'+t.evidence+'</p></div>'+
+      '<div class="tt-row"><h4>Qué hacer (propuesta)</h4><ol>'+t.steps.map(function(s){return "<li>"+s+"</li>";}).join("")+'</ol></div>'+
+      '<div class="tt-row"><h4>Cuándo está hecha</h4><p>'+t.done+'</p></div>'+
+      (t.cal?'<div class="tt-row"><h4>Relación con el calendario</h4><p>'+t.cal+'</p></div>':'')+
+      '<div class="tt-actions"><label class="sr-only" for="st-'+t.id+'">Estado de '+t.id+'</label>'+
+      '<select id="st-'+t.id+'"><option>Pendiente</option><option>En curso</option><option>Hecho</option></select>'+
+      '<button type="button" class="tt-copy">Copiar para ClickUp</button></div></div>';
+    el.querySelector(".tt-title").textContent=t.title;
+    var sel=el.querySelector("select");sel.value=st;
+    sel.addEventListener("change",function(){state[t.id]=sel.value;save();el.classList.toggle("is-done",sel.value==="Hecho");el.querySelector(".tt-st").textContent=sel.value;apply();});
+    var btn=el.querySelector(".tt-copy");
+    btn.addEventListener("click",function(){
+      var txt="K2RA · "+t.id+" — "+t.title+"\nPrioridad: "+t.prio+" · Hasta "+t.due+(t.approval?" · Requiere aprobación":"")+
+        "\n\nQué pasa: "+strip(t.problem)+"\n\nEvidencia: "+strip(t.evidence)+"\n\nQué hacer:\n"+t.steps.map(function(s,i){return (i+1)+". "+strip(s);}).join("\n")+
+        "\n\nCuándo está hecha: "+strip(t.done)+(t.cal?"\nCalendario: "+strip(t.cal):"");
+      var done=function(){btn.textContent="Copiado ✓";setTimeout(function(){btn.textContent="Copiar para ClickUp";},1600);};
+      try{navigator.clipboard.writeText(txt).then(done,function(){fallback(txt);done();});}catch(e){fallback(txt);done();}
+    });
+    return el;
+  }
+  function fallback(txt){var ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}document.body.removeChild(ta);}
+
+  GROUPS.forEach(function(g){
+    var wrap=document.createElement("div");wrap.className="tt-section";wrap.dataset.prio=g[0];
+    var h=document.createElement("div");h.className="tt-group";h.innerHTML='<h3></h3><span class="line"></span>';h.querySelector("h3").textContent=g[1];
+    var list=document.createElement("div");list.className="tt-list";
+    TASKS.filter(function(t){return t.prio===g[0];}).forEach(function(t){list.appendChild(card(t));});
+    wrap.appendChild(h);wrap.appendChild(list);root.appendChild(wrap);
+  });
+
+  function apply(){
+    var done=0;
+    root.querySelectorAll(".tt-card").forEach(function(c){
+      var st=state[c.dataset.id]||"Pendiente";if(st==="Hecho")done++;
+      var show=filter==="all"||(filter==="open"?st!=="Hecho":c.dataset.prio===filter);
+      c.hidden=!show;
+    });
+    root.querySelectorAll(".tt-section").forEach(function(s){s.hidden=!s.querySelector(".tt-card:not([hidden])");});
+    document.getElementById("tt-progress").innerHTML="<b>"+done+"</b> de "+TASKS.length+" hechas";
+  }
+  document.querySelectorAll("[data-tt-filter]").forEach(function(b){
+    b.addEventListener("click",function(){filter=b.dataset.ttFilter;document.querySelectorAll("[data-tt-filter]").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});apply();});
+  });
+  apply();
+})();
+</script>
+<!-- ===== FIN TAREAS TÉCNICAS ===== -->
+
         <footer class="workspace-footer">
           <span><i data-icon="check"></i><span id="footer-context"></span></span
           ><span
